@@ -246,8 +246,6 @@ var Jackey8 = (function (type) {
             }
         }
     };
-
-    
     return J8;
 
 })(type);
