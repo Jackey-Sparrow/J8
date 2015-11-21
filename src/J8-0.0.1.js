@@ -3,6 +3,8 @@
  */
 
 var type = (function () {
+    'use strict';
+
     var type = {},
         class2type = {},
         toString = class2type.toString;
@@ -11,11 +13,19 @@ var type = (function () {
         class2type['[object ' + name + ']'] = name.toLowerCase();
     });
 
+    type.isWindow = function (obj) {
+        return obj !== null && obj.window && obj === obj.window;
+    };
+
+    type.isFunction = function (obj) {
+        return class2type[toString.call(obj)] === 'function';
+    };
+
 
     return type;
 })();
 
-var Jackey8 = (function () {
+var Jackey8 = (function (type) {
     'use strict';
 
     var J8,
@@ -77,7 +87,10 @@ var Jackey8 = (function () {
     };
 
 
-})();
+    return J8;
+
+
+})(type);
 
 window.Jackey8 = Jackey8;
 
