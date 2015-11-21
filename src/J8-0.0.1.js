@@ -39,6 +39,12 @@ var Jackey8 = (function () {
             else if (context !== void 0) {
                 J8(context).find(selector);
             }
+            else {
+                // 正常的选取
+                // 1 id 2 class 3 复杂选取
+                // 作用域为document，因为如果存在context，则执行$(conetxt).find(selector)
+                dom = jackey8.queryDom(document, selector);
+            }
         }
     };
 
