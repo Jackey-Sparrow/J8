@@ -1,6 +1,15 @@
 /**
  * Created by lja on 2015/11/20.
  */
+
+var type = (function () {
+    var type = {};
+
+
+
+    return type;
+})();
+
 var Jackey8 = (function () {
     'use strict';
 
