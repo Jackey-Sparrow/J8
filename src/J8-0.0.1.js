@@ -3,8 +3,13 @@
  */
 
 var type = (function () {
-    var type = {};
+    var type = {},
+        class2type = {},
+        toString = class2type.toString;
 
+    ('Boolean Number String Function Array Date RegExp Object Error').split(' ').forEach(function (name) {
+        class2type['[object ' + name + ']'] = name.toLowerCase();
+    });
 
 
     return type;
