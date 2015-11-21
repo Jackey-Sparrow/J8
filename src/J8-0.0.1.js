@@ -6,7 +6,8 @@ var Jackey8 = (function () {
 
     var J8,
         emptyArray = [],
-        jackey8 = {};
+        jackey8 = {},
+        simpleSelectorRE = /^[\w-]*$/;//字母 数字 或者下划线，不包括空格
 
     //decorate the __proto__ and selector
     //todo: __proto__ not supported on IE
