@@ -13,13 +13,32 @@ var type = (function () {
         class2type['[object ' + name + ']'] = name.toLowerCase();
     });
 
-    type.isWindow = function (obj) {
+    function isWindow(obj) {
         return obj !== null && obj.window && obj === obj.window;
-    };
+    }
 
-    type.isFunction = function (obj) {
+    function isFunction(obj) {
         return class2type[toString.call(obj)] === 'function';
-    };
+    }
+
+    function isDocument(obj) {
+        return obj && obj.nodeType === obj.DOCUMENT_NODE;
+    }
+
+    function isObject(obj) {
+        return class2type[toString.call(obj)] === 'object';
+    }
+
+    function isPlainObject(obj) {
+        return isObject(obj) && !isWindow(obj) &&
+            Object.getPrototypeOf(obj) === Object.prototype;
+    }
+
+    type.isWindow = isWindow;
+    type.isFunction = isFunction;
+    type.isDocument = isDocument;
+    type.isObject = isObject;
+    type.isPlainObject = isPlainObject;
 
 
     return type;
