@@ -49,6 +49,7 @@ var Jackey8 = (function (type) {
         emptyArray = [],
         jackey8 = {},
         simpleSelectorRE = /^[\w-]*$/,//字母 数字 或者下划线，不包括空格
+        tagExpanderRE = /<(?!area|br|col|embed|hr|img|input|link|meta|param)(([\w:]+)[^>]*)\/>/ig,//tag reg
         htmlFragmentRE = /^\s*<(\w+|!)[^>]*>/;//html片段
 
     function filterNullArray(array) {
@@ -67,7 +68,10 @@ var Jackey8 = (function (type) {
     };
 
     jackey8.createNodeByHtmlFragment = function (html, name, properties) {
-
+        var dom, nodes, container;
+        if (simpleSelectorRE.test(html)) {
+            dom = $(document.createElement(RegExp.$1));
+        }
     };
 
     /**
