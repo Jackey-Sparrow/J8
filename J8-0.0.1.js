@@ -66,6 +66,10 @@ var Jackey8 = (function (type) {
         return dom;
     };
 
+    jackey8.createNodeByHtmlFragment = function (html, name, properties) {
+
+    };
+
     /**
      * find selector in context
      * @param context
@@ -118,8 +122,9 @@ var Jackey8 = (function (type) {
             //如果它是一个html片段，则创建一个节点
             //提示：在chrome21和Firefox15下面，
             // 如果不是<开头， 会抛错
-            if (selector[0] === '<') {
+            if (selector[0] === '<' && htmlFragmentRE.test(selector)) {
                 //todo:
+
             }
             //如果有parent，则先找到parent,然后使用find去找到selector
             else if (context !== void 0) {
