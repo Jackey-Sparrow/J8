@@ -135,16 +135,16 @@ var Jackey8 = (function (type) {
             $(document).ready(selector);
         } else if (selector instanceof jackey8) {
             return selector;
+        } else if (type.isArray(selector)) {
+            dom = filterNullArray(selector);
+        } else if (type.isObject(selector)) {
+            dom = [selector];
+            selector = null;
         } else {
-            if (type.isArray(selector)) {
-                dom = filterNullArray(selector);
-            } else if (type.isObject(selector)) {
-                dom = [selector];
-                selector = null;
-            }else if(htmlFragmentRE.test(selector)){
-                //todo:
-            }
+            dom = [];
         }
+
+        return jackey8.decorateDom(dom, selector);
     };
 
     J8 = function (selector, context) {
