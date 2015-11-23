@@ -48,7 +48,8 @@ var Jackey8 = (function (type) {
     var J8,
         emptyArray = [],
         jackey8 = {},
-        simpleSelectorRE = /^[\w-]*$/;//字母 数字 或者下划线，不包括空格
+        simpleSelectorRE = /^[\w-]*$/,//字母 数字 或者下划线，不包括空格
+        htmlFragmentRE = /^\s*<(\w+|!)[^>]*>/;//html片段
 
     function filterNullArray(array) {
         return emptyArray.filter.call(array, function (item) {
@@ -140,6 +141,8 @@ var Jackey8 = (function (type) {
             } else if (type.isObject(selector)) {
                 dom = [selector];
                 selector = null;
+            }else if(htmlFragmentRE.test(selector)){
+                //todo:
             }
         }
     };
