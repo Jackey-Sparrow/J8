@@ -238,6 +238,7 @@ var Jackey8 = (function (type) {
             if (readyRE.test(document.readyState) && document.body) {
                 callback(J8);
             } else {
+                //todo: need to test DOMContentLoaded in each browsers
                 document.addEventListener('DOMContentLoaded', function () {
                     callback(J8);
                 }, false);
