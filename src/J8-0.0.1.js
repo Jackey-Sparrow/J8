@@ -123,6 +123,7 @@ var Jackey8 = (function (type) {
 
     /**
      * find selector in context
+     * by id class and 复杂类型：ul li
      * @param context
      * @param selector
      */
