@@ -28,6 +28,10 @@ var type = (function () {
         return class2type[toString.call(obj)] === 'object';
     }
 
+    function isArray(obj) {
+        return class2type[toString.call(obj)] === 'array';
+    }
+
     function isPlainObject(obj) {
         return isObject(obj) && !isWindow(obj) &&
             Object.getPrototypeOf(obj) === Object.prototype;
@@ -38,7 +42,8 @@ var type = (function () {
         isFunction: isFunction,
         isDocument: isDocument,
         isObject: isObject,
-        isPlainObject: isPlainObject
+        isPlainObject: isPlainObject,
+        isArray: isArray
     };
 })();
 
@@ -48,6 +53,8 @@ var Jackey8 = (function (type) {
     var J8,
         emptyArray = [],
         jackey8 = {},
+        table = document.createElement('table'),
+        tableRow = document.createElement('tr'),
         containers = {
             'tr': document.createElement('tbody'),
             'tbody': table, 'thead': table, 'tfoot': table,
@@ -58,6 +65,7 @@ var Jackey8 = (function (type) {
         methodAttributes = ['val', 'css', 'html', 'text', 'data', 'width', 'height', 'offset'],
         simpleSelectorRE = /^[\w-]*$/,//字母 数字 或者下划线，不包括空格
         tagExpanderRE = /<(?!area|br|col|embed|hr|img|input|link|meta|param)(([\w:]+)[^>]*)\/>/ig,//tag reg
+        readyRE = /complete|loaded|interactive/,
         htmlFragmentRE = /^\s*<(\w+|!)[^>]*>/;//html片段
 
     function filterNullArray(array) {
@@ -78,7 +86,7 @@ var Jackey8 = (function (type) {
     jackey8.createNodeByHtmlFragment = function (html, name, properties) {
         var dom, nodes, container;
         if (simpleSelectorRE.test(html)) {
-            dom = $(document.createElement(RegExp.$1));
+            dom = J8(document.createElement(RegExp.$1));
         }
 
         if (!dom) {
@@ -102,7 +110,7 @@ var Jackey8 = (function (type) {
         }
 
         if (type.isPlainObject(properties)) {
-            nodes = $(dom);
+            nodes = J8(dom);
             J8.each(properties, function (key, value) {
                 if (methodAttributes.indexOf(key) > -1) {
                     nodes[key](value);
@@ -166,6 +174,7 @@ var Jackey8 = (function (type) {
             //提示：在chrome21和Firefox15下面，
             // 如果不是<开头， 会抛错
             if (selector[0] === '<' && htmlFragmentRE.test(selector)) {
+                //todo:
                 dom = jackey8.createNodeByHtmlFragment(selector, RegExp.$1, context);
                 selector = null;
             }
@@ -180,8 +189,8 @@ var Jackey8 = (function (type) {
                 dom = jackey8.queryDom(document, selector);
             }
         } else if (type.isFunction(selector)) {
-            $(document).ready(selector);
-        } else if (selector instanceof jackey8) {
+            J8(document).ready(selector);
+        } else if (selector instanceof jackey8.decorateDom) {
             return selector;
         } else if (type.isArray(selector)) {
             dom = filterNullArray(selector);
@@ -223,7 +232,17 @@ var Jackey8 = (function (type) {
         push: emptyArray.push,
         sort: emptyArray.sort,
         indexOf: emptyArray.indexOf,
-        concat: emptyArray.concat
+        concat: emptyArray.concat,
+        ready: function (callback) {
+            if (readyRE.test(document.readyState) && document.body) {
+                callback(J8);
+            } else {
+                document.addEventListener('DOMContentLoaded', function () {
+                    callback(J8);
+                }, false);
+                return this;
+            }
+        }
     };
 
 
