@@ -48,7 +48,23 @@ var Jackey8 = (function (type) {
 	var J8,
 		emptyArray = [],
 		jackey8 = {},
-		simpleSelectorRE = /^[\w-]*$/;//字母 数字 或者下划线，不包括空格
+		containers = {
+			'tr': document.createElement('tbody'),
+			'tbody': table, 'thead': table, 'tfoot': table,
+			'td': tableRow, 'th': tableRow,
+			'*': document.createElement('div')
+		},
+	// special attributes that should be get/set via method calls
+		methodAttributes = ['val', 'css', 'html', 'text', 'data', 'width', 'height', 'offset'],
+		simpleSelectorRE = /^[\w-]*$/,//字母 数字 或者下划线，不包括空格
+		tagExpanderRE = /<(?!area|br|col|embed|hr|img|input|link|meta|param)(([\w:]+)[^>]*)\/>/ig,//tag reg
+		htmlFragmentRE = /^\s*<(\w+|!)[^>]*>/;//html片段
+
+	function filterNullArray(array) {
+		return emptyArray.filter.call(array, function (item) {
+			return item !== null;
+		});
+	}
 
 	//decorate the __proto__ and selector
 	//todo: __proto__ not supported on IE
@@ -57,6 +73,44 @@ var Jackey8 = (function (type) {
 		dom.__proto__ = J8.fn;//jshint ignore:line
 		dom.selector = selector;
 		return dom;
+	};
+
+	jackey8.createNodeByHtmlFragment = function (html, name, properties) {
+		var dom, nodes, container;
+		if (simpleSelectorRE.test(html)) {
+			dom = $(document.createElement(RegExp.$1));
+		}
+
+		if (!dom) {
+			if (html.replace) {
+				html = html.replace(tagExpanderRE, '<$1></$2>');
+			}
+
+			if (name === void 0) {
+				name = htmlFragmentRE.test(html) && RegExp.$1;
+			}
+
+			if (!(name in containers)) {
+				name = '*';
+			}
+
+			container = containers[name];
+			container.innerHTML = '' + html;//add html fragment to dom, make it node
+			dom = J8.each(emptyArray.slice.call(container.childNodes), function () {
+				container.removeChild(this);
+			});
+		}
+
+		if (type.isPlainObject(properties)) {
+			nodes = $(dom);
+			J8.each(properties, function (key, value) {
+				if (methodAttributes.indexOf(key) > -1) {
+					nodes[key](value);
+				} else {
+					nodes.attr(key, value);
+				}
+			});
+		}
 	};
 
 	/**
@@ -71,7 +125,7 @@ var Jackey8 = (function (type) {
 			name = maybeId || maybeClass ? selector.slice(1) : selector,
 			isSample = simpleSelectorRE.test(name);
 
-		if (!isDocument(context)) {
+		if (!type.isDocument(context)) {
 			return found;
 		}
 
@@ -111,8 +165,10 @@ var Jackey8 = (function (type) {
 			//如果它是一个html片段，则创建一个节点
 			//提示：在chrome21和Firefox15下面，
 			// 如果不是<开头， 会抛错
-			if (selector[0] === '<') {
+			if (selector[0] === '<' && htmlFragmentRE.test(selector)) {
 				//todo:
+				dom = jackey8.createNodeByHtmlFragment(selector, RegExp.$1, context);
+				selector = null;
 			}
 			//如果有parent，则先找到parent,然后使用find去找到selector
 			else if (context !== void 0) {
@@ -124,12 +180,43 @@ var Jackey8 = (function (type) {
 				// 作用域为document，因为如果存在context，则执行$(conetxt).find(selector)
 				dom = jackey8.queryDom(document, selector);
 			}
+		} else if (type.isFunction(selector)) {
+			$(document).ready(selector);
+		} else if (selector instanceof jackey8) {
+			return selector;
+		} else if (type.isArray(selector)) {
+			dom = filterNullArray(selector);
+		} else if (type.isObject(selector)) {
+			dom = [selector];
+			selector = null;
+		} else {
+			dom = [];
 		}
+
+		return jackey8.decorateDom(dom, selector);
 	};
 
 	J8 = function (selector, context) {
 		return jackey8.init(selector, context);
 	};
+
+	J8.each = function (elements, callback) {
+		var i, key;
+		if (type.isArray(elements)) {
+			for (i = 0; i < elements.length; i++) {
+				if (callback.call(elements[i], i, elements[i]) === false) {
+					return elements;
+				}
+			}
+		} else {
+			for (key in elements) {
+				if (callback.call(elements[key], key, elements[key]) === false) {
+					return elements;
+				}
+			}
+		}
+		return elements;
+	}
 
 	J8.fn = {
 		forEach: emptyArray.forEach,

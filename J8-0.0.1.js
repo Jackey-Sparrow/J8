@@ -166,7 +166,6 @@ var Jackey8 = (function (type) {
             //提示：在chrome21和Firefox15下面，
             // 如果不是<开头， 会抛错
             if (selector[0] === '<' && htmlFragmentRE.test(selector)) {
-                //todo:
                 dom = jackey8.createNodeByHtmlFragment(selector, RegExp.$1, context);
                 selector = null;
             }
