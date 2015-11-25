@@ -32,6 +32,10 @@ var type = (function () {
         return class2type[toString.call(obj)] === 'array';
     }
 
+    function isNumber(obj) {
+        return class2type[toString.call(obj)] === 'number';
+    }
+
     function isPlainObject(obj) {
         return isObject(obj) && !isWindow(obj) &&
             Object.getPrototypeOf(obj) === Object.prototype;
@@ -43,7 +47,8 @@ var type = (function () {
         isDocument: isDocument,
         isObject: isObject,
         isPlainObject: isPlainObject,
-        isArray: isArray
+        isArray: isArray,
+        isNumber: isNumber
     };
 })();
 
@@ -292,11 +297,17 @@ var Jackey8 = (function (type) {
             }
         },
         get: function (index) {
-            if (!index) {
+            if (!type.isNumber(index)) {
                 return slice.call(this);
             }
 
             return index >= 0 ? this[index] : this[index + this.length];
+        },
+        toArray: function () {
+            return slice.call(this);
+        },
+        size: function () {
+            return this.length;
         }
     };
 
