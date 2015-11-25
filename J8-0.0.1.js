@@ -52,6 +52,7 @@ var Jackey8 = (function (type) {
 
     var J8,
         emptyArray = [],
+        slice = emptyArray.slice,
         jackey8 = {},
         table = document.createElement('table'),
         tableRow = document.createElement('tr'),
@@ -114,7 +115,7 @@ var Jackey8 = (function (type) {
 
             container = containers[name];
             container.innerHTML = '' + html;//添加到parentNode，并实现转换成dom的过程
-            dom = J8.each(emptyArray.slice.call(container.childNodes), function () {
+            dom = J8.each(slice.call(container.childNodes), function () {
                 container.removeChild(this);//从parentNode中移除，并返回childNodes
             });
         }
@@ -152,7 +153,7 @@ var Jackey8 = (function (type) {
 
         //如果不是简单类型（复杂类型ul li a），使用querySelectorAll
         if (!isSample) {
-            found = emptyArray.slice.call(context.querySelectorAll(selector));
+            found = slice.call(context.querySelectorAll(selector));
         } else {
             if (maybeId) {
                 found = context.getElementById(name);
@@ -169,7 +170,7 @@ var Jackey8 = (function (type) {
             }
         }
 
-        return emptyArray.slice.call(found);
+        return slice.call(found);
     };
 
     //selector: empty string function object array and the instance of Jackey8
@@ -289,6 +290,13 @@ var Jackey8 = (function (type) {
                 }, false);
                 return this;
             }
+        },
+        get: function (index) {
+            if (!index) {
+                return slice.call(this);
+            }
+
+            return index >= 0 ? this[index] : this[index + this.length];
         }
     };
 
