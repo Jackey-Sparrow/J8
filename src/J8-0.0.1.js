@@ -308,6 +308,19 @@ var Jackey8 = (function (type) {
         },
         size: function () {
             return this.length;
+        },
+        remove: function () {
+            return this.each(function () {
+                if (this.parentNode !== null) {
+                    this.parentNode.remove(this);
+                }
+            });
+        },
+        each: function (callback) {
+            emptyArray.every.call(this, function (element, index) {
+                return callback.call(element, index, element) !== false;
+            });
+            return this;
         }
     };
 
