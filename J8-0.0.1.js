@@ -69,7 +69,7 @@ var Jackey8 = (function (type) {
         htmlFragmentRE = /^\s*<(\w+|!)[^>]*>/;//html片段
 
     //去除null的值
-    function filterNullArray(array) {
+    function removeNullArray(array) {
         return emptyArray.filter.call(array, function (item) {
             return item !== null;
         });
@@ -207,7 +207,7 @@ var Jackey8 = (function (type) {
         } else if (selector instanceof jackey8.decorateDom) {
             return selector;
         } else if (type.isArray(selector)) {
-            dom = filterNullArray(selector);
+            dom = removeNullArray(selector);
         } else if (type.isObject(selector)) {
             dom = [selector];
             selector = null;
