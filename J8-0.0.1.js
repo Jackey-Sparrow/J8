@@ -310,9 +310,10 @@ var Jackey8 = (function (type) {
             return this.length;
         },
         remove: function () {
+            //通过parentNode.removeChildren
             return this.each(function () {
                 if (this.parentNode !== null) {
-                    this.parentNode.remove(this);
+                    this.parentNode.removeChild(this);
                 }
             });
         },
