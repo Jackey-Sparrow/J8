@@ -322,6 +322,12 @@ var Jackey8 = (function (type) {
                 return callback.call(element, index, element) !== false;
             });
             return this;
+        },
+        //slice: function () {
+        //    return J8(slice.apply(this, arguments))
+        //},
+        eq: function (index) {
+            return index === -1 ? slice.call(this, index) : slice.call(this, index, +index + 1);
         }
     };
 
