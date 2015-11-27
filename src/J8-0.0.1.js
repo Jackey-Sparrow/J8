@@ -323,11 +323,11 @@ var Jackey8 = (function (type) {
             });
             return this;
         },
-        //slice: function () {
-        //    return J8(slice.apply(this, arguments))
-        //},
+        slice: function () {
+            return J8(slice.apply(this, arguments));
+        },
         eq: function (index) {
-            return index === -1 ? slice.call(this, index) : slice.call(this, index, +index + 1);
+            return index === -1 ? this.slice(index) : this.slice(index, +index + 1);
         }
     };
 
