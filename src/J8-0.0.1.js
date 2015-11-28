@@ -324,6 +324,7 @@ var Jackey8 = (function (type) {
             return this;
         },
         slice: function () {
+            //J8() 转为J8实例
             return J8(slice.apply(this, arguments));
         },
         eq: function (index) {
