@@ -375,6 +375,20 @@ var Jackey8 = (function (type) {
         eq: function (index) {
             return index === -1 ? this.slice(index) : this.slice(index, +index + 1);
         },
+        first: function () {
+            var element = this[0];
+            return element && type.isObject(element) ? element : J8(element);
+        },
+        last: function () {
+            var element = this[this.length - 1];
+            return element && type.isObject(element) ? element : J8(element);
+        },
+        is: function (selector) {
+            if (this.length > 0 && jackey8.matches(this[0], selector)) {
+                return true;
+            }
+            return false;
+        },
         not: function (selector) {
             var nodes = [];
             if (type.isFunction(selector)) {
