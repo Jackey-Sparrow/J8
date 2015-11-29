@@ -224,6 +224,42 @@ var Jackey8 = (function (type) {
         return jackey8.decorateDom(dom, selector);
     };
 
+    //查找selector是否存在于element元素中
+    jackey8.matches = function (element, selector) {
+        if (!selector || !element || element.nodeType !== 1) {
+            return false;
+        }
+
+        //matchesSelector(element,selector)
+        //检测该选择器selector是否匹配该元素element的属性
+        var matcherSelector = element.webkitMatchesSelector ||
+            element.mosMatchesSelector ||
+            element.oMatchesSelector ||
+            element.matchesSelector;
+
+        if (matcherSelector) {
+            return matcherSelector.call(element, selector);
+        }
+
+        var match, parent = element.parentNode, temp = !parent;
+
+        //如果没有parentNode
+        if (temp) {
+            parent = document.createElement('div');
+            parent.appendChild(element);
+        }
+
+        //~-1 = 0
+        match = ~jackey8.queryDom(parent, selector).indexOf(element);
+
+        if (temp) {
+            parent.removeChild(element);
+        }
+
+        return !!match;
+
+    }
+
     J8 = function (selector, context) {
         return jackey8.init(selector, context);
     };
