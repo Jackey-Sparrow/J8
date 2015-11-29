@@ -386,9 +386,11 @@ var Jackey8 = (function (type) {
                 });
             } else {
                 var excludes;
+                //如果是单纯的string，则检查当前返回的html collection里面是否匹配selector
                 if (typeof selector === 'string') {
                     excludes = this.filter(selector);
                 } else {
+                    //如果是数组，而且item为函数，则直接赋值，其它则实例化
                     if (type.isArray(selector) && type.isFunction(selector.item)) {
                         excludes = slice.call(selector);
                     } else {
