@@ -224,6 +224,42 @@ var Jackey8 = (function (type) {
         return jackey8.decorateDom(dom, selector);
     };
 
+    //查找selector是否存在于element元素中
+    jackey8.matches = function (element, selector) {
+        if (!selector || !element || element.nodeType !== 1) {
+            return false;
+        }
+
+        //matchesSelector(element,selector)
+        //检测该选择器selector是否匹配该元素element的属性
+        var matcherSelector = element.webkitMatchesSelector ||
+            element.mosMatchesSelector ||
+            element.oMatchesSelector ||
+            element.matchesSelector;
+
+        if (matcherSelector) {
+            return matcherSelector.call(element, selector);
+        }
+
+        var match, parent = element.parentNode, temp = !parent;
+
+        //如果没有parentNode
+        if (temp) {
+            parent = document.createElement('div');
+            parent.appendChild(element);
+        }
+
+        //~-1 = 0
+        match = ~jackey8.queryDom(parent, selector).indexOf(element);
+
+        if (temp) {
+            parent.removeChild(element);
+        }
+
+        return !!match;
+
+    };
+
     J8 = function (selector, context) {
         return jackey8.init(selector, context);
     };
@@ -238,7 +274,7 @@ var Jackey8 = (function (type) {
                 }
             }
         } else {
-            for (key in elements) {
+            for (key in elements) {//jshint ignore:line
                 value = callback(elements[key], key);
                 if (value) {
                     values.push(value);
@@ -272,7 +308,7 @@ var Jackey8 = (function (type) {
             }
         }
         return elements;
-    }
+    };
 
     J8.fn = {
         forEach: emptyArray.forEach,
@@ -317,11 +353,72 @@ var Jackey8 = (function (type) {
                 }
             });
         },
+        filter: function (selector) {
+            if (type.isFunction(selector)) {
+                return this.not(this.not(selector));
+            }
+            //选取返回的html collection中匹配selector的元素
+            return J8(emptyArray.filter.call(this, function (element) {
+                return jackey8.matches(element, selector);
+            }));
+        },
         each: function (callback) {
             emptyArray.every.call(this, function (element, index) {
                 return callback.call(element, index, element) !== false;
             });
             return this;
+        },
+        slice: function () {
+            //J8() 转为J8实例
+            return J8(slice.apply(this, arguments));
+        },
+        eq: function (index) {
+            return index === -1 ? this.slice(index) : this.slice(index, +index + 1);
+        },
+        first: function () {
+            var element = this[0];
+            return element && type.isObject(element) ? element : J8(element);
+        },
+        last: function () {
+            var element = this[this.length - 1];
+            return element && type.isObject(element) ? element : J8(element);
+        },
+        is: function (selector) {
+            if (this.length > 0 && jackey8.matches(this[0], selector)) {
+                return true;
+            }
+            return false;
+        },
+        not: function (selector) {
+            var nodes = [];
+            if (type.isFunction(selector)) {
+                this.each(function (index) {
+                    //如果函数执行后不是返回false，则push进去
+                    if (!selector.call(this, index)) {
+                        nodes.push(this);
+                    }
+                });
+            } else {
+                var excludes;
+                //如果是单纯的string，则检查当前返回的html collection里面是否匹配selector
+                if (typeof selector === 'string') {
+                    excludes = this.filter(selector);
+                } else {
+                    //如果是数组，而且item为函数，则直接赋值，其它则实例化
+                    if (type.isArray(selector) && type.isFunction(selector.item)) {
+                        excludes = slice.call(selector);
+                    } else {
+                        J8(selector);
+                    }
+                    this.forEach(function (element) {
+                        if (excludes.indexOf(element)) {
+                            nodes.push(element);
+                        }
+                    });
+                }
+                //array
+                return J8(nodes);
+            }
         }
     };
 
