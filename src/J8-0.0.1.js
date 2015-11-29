@@ -258,7 +258,7 @@ var Jackey8 = (function (type) {
 
         return !!match;
 
-    }
+    };
 
     J8 = function (selector, context) {
         return jackey8.init(selector, context);
@@ -274,7 +274,7 @@ var Jackey8 = (function (type) {
                 }
             }
         } else {
-            for (key in elements) {
+            for (key in elements) {//jshint ignore:line
                 value = callback(elements[key], key);
                 if (value) {
                     values.push(value);
@@ -308,7 +308,7 @@ var Jackey8 = (function (type) {
             }
         }
         return elements;
-    }
+    };
 
     J8.fn = {
         forEach: emptyArray.forEach,
@@ -353,6 +353,15 @@ var Jackey8 = (function (type) {
                 }
             });
         },
+        filter: function (selector) {
+            if (type.isFunction(selector)) {
+                return this.not(this.not(selector));
+            }
+            //选取返回的html collection中匹配selector的元素
+            return J8(emptyArray.filter.call(this, function (element) {
+                return jackey8.matches(element, selector);
+            }));
+        },
         each: function (callback) {
             emptyArray.every.call(this, function (element, index) {
                 return callback.call(element, index, element) !== false;
@@ -365,6 +374,35 @@ var Jackey8 = (function (type) {
         },
         eq: function (index) {
             return index === -1 ? this.slice(index) : this.slice(index, +index + 1);
+        },
+        not: function (selector) {
+            var nodes = [];
+            if (type.isFunction(selector)) {
+                this.each(function (index) {
+                    //如果函数执行后不是返回false，则push进去
+                    if (!selector.call(this, index)) {
+                        nodes.push(this);
+                    }
+                });
+            } else {
+                var excludes;
+                if (typeof selector === 'string') {
+                    excludes = this.filter(selector);
+                } else {
+                    if (type.isArray(selector) && type.isFunction(selector.item)) {
+                        excludes = slice.call(selector);
+                    } else {
+                        J8(selector);
+                    }
+                    this.forEach(function (element) {
+                        if (excludes.indexOf(element)) {
+                            nodes.push(element);
+                        }
+                    });
+                }
+                //array
+                return J8(nodes);
+            }
         }
     };
 
