@@ -215,6 +215,7 @@ var Jackey8 = (function (type) {
         } else if (type.isArray(selector)) {
             dom = removeNullArray(selector);
         } else if (type.isObject(selector)) {
+            //返回数组
             dom = [selector];
             selector = null;
         } else {
@@ -405,6 +406,7 @@ var Jackey8 = (function (type) {
             return false;
         },
         has: function (selector) {
+            //s是否具有selector
             return this.filter(function () {
                 return type.isObject(selector) ?
                     J8.contains(this, selector) :
@@ -412,6 +414,7 @@ var Jackey8 = (function (type) {
             });
         },
         not: function (selector) {
+            //查找不是selector的集合 ｜｜ 去掉selector的元素
             var nodes = [];
             if (type.isFunction(selector)) {
                 this.each(function (index) {
@@ -443,6 +446,7 @@ var Jackey8 = (function (type) {
             }
         },
         find: function (selector) {
+            //查找selector(子元素)，返回一个组合的结果
             var result, J8this = this;
             if (!selector) {
                 //如果selector为空，返回一个空的J8实例
@@ -477,16 +481,30 @@ var Jackey8 = (function (type) {
         }
     };
 
+    //选取元素的属性
     function getProperty(elements, property) {
         return J8.map(elements, function (element) {
             return element[property];
         });
     }
 
+    //去重
     function unique(arr) {
         return emptyArray.filter.call(arr, function (item, index) {
             return arr.indexOf(item) === index;
         });
+    }
+
+    //选取元素的子节点
+    //如果具有children属性则使用，没有则使用childNodes
+    function getChildren(element) {
+        return 'children' in element ?
+            slice.call(element.children) :
+            J8.map(element.childNodes, function (node) {
+                if (node.nodeType === 1) {
+                    return node;
+                }
+            });
     }
 
     return J8;
