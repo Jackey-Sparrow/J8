@@ -215,6 +215,7 @@ var Jackey8 = (function (type) {
         } else if (type.isArray(selector)) {
             dom = removeNullArray(selector);
         } else if (type.isObject(selector)) {
+            //返回数组
             dom = [selector];
             selector = null;
         } else {
@@ -477,12 +478,14 @@ var Jackey8 = (function (type) {
         }
     };
 
+    //选取元素的属性
     function getProperty(elements, property) {
         return J8.map(elements, function (element) {
             return element[property];
         });
     }
 
+    //去重
     function unique(arr) {
         return emptyArray.filter.call(arr, function (item, index) {
             return arr.indexOf(item) === index;
