@@ -478,6 +478,22 @@ var Jackey8 = (function (type) {
             //去重
             parentNodes = unique(parentNodes);
             return J8(parentNodes).filter(selector);
+        },
+        parents: function (selector) {
+            var result = [], nodes = this;
+            //深度遍历
+            while (nodes.length > 0) {
+                nodes = J8.map(nodes, function (node) {
+                    //选取父亲节点，检查是否是document
+                    node = node.parentNode;
+                    if (type.isDocument(node) && result.indexOf(node) === -1) {
+                        result.push(node);
+                        return node;
+                    }
+                });//jshint ignore:line
+            }
+
+            return J8(result).filter(selector);
         }
     };
 
