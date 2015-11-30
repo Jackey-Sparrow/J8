@@ -449,6 +449,7 @@ var Jackey8 = (function (type) {
                 result = J8();
             } else if (typeof selector === 'object') {
                 // 如果是对象
+                //todo: object
                 return J8(selector).filter(function () {
                     var node = this;
                     return emptyArray.some.call(J8this, function (parent) {
@@ -466,8 +467,27 @@ var Jackey8 = (function (type) {
             }
 
             return result;
+        },
+        parent: function (selector) {
+            //取得父亲节点
+            var parentNodes = getProperty(this, 'parentNode');
+            //去重
+            parentNodes = unique(parentNodes);
+            return J8(parentNodes).filter(selector);
         }
     };
+
+    function getProperty(elements, property) {
+        return J8.map(elements, function (element) {
+            return element[property];
+        });
+    }
+
+    function unique(arr) {
+        return emptyArray.filter.call(arr, function (item, index) {
+            return arr.indexOf(item) === index;
+        });
+    }
 
     return J8;
 
