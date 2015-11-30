@@ -404,6 +404,13 @@ var Jackey8 = (function (type) {
             }
             return false;
         },
+        has: function (selector) {
+            return this.filter(function () {
+                return type.isObject(selector) ?
+                    J8.contains(this, selector) :
+                    J8(this).find(selector).size();
+            });
+        },
         not: function (selector) {
             var nodes = [];
             if (type.isFunction(selector)) {
@@ -449,8 +456,10 @@ var Jackey8 = (function (type) {
                     });
                 });
             } else if (this.length === 1) {
+                //如果只有一个元素，利用queryDom(context,selector), 返回改元素的实例
                 result = J8(jackey8.queryDom(this[0], selector));
             } else {
+                //多个数组，则遍历
                 result = this.map(function () {
                     return jackey8.queryDom(this, selector);
                 });
