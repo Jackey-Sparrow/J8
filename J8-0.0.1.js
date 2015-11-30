@@ -510,6 +510,14 @@ var Jackey8 = (function (type) {
                 //转换为数组返回childNodes
                 return slice.call(element.childNodes);
             });
+        },
+        siblings: function (selector) {
+            var result = J8.map(this, function (element) {
+                return emptyArray.filter.call(getChildren(element.parentNode), function (child) {
+                    return child !== element;
+                });
+            });
+            return J8(result).filter(selector);
         }
     };
 
