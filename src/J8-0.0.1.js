@@ -285,6 +285,20 @@ var Jackey8 = (function (type) {
         return values;
     };
 
+    //parent 是否是node的父亲节点
+    J8.contains = document.documentElement.contains ?
+        function (parent, node) {
+            return parent !== node && parent.contains(node);
+        } :
+        function (parent, node) {
+            while (node && (node = node.parentNode)) {
+                if (node === parent) {
+                    return true;
+                }
+                return false;
+            }
+        };
+
     /**
      * each
      * 遍历数组或者对象
