@@ -285,6 +285,21 @@ var Jackey8 = (function (type) {
         return values;
     };
 
+    //parent 是否是node的父亲节点
+    //document.documentElement.contains(node)
+    J8.contains = document.documentElement.contains ?
+        function (parent, node) {
+            return parent !== node && parent.contains(node);
+        } :
+        function (parent, node) {
+            while (node && (node = node.parentNode)) {
+                if (node === parent) {
+                    return true;
+                }
+                return false;
+            }
+        };
+
     /**
      * each
      * 遍历数组或者对象
@@ -389,6 +404,13 @@ var Jackey8 = (function (type) {
             }
             return false;
         },
+        has: function (selector) {
+            return this.filter(function () {
+                return type.isObject(selector) ?
+                    J8.contains(this, selector) :
+                    J8(this).find(selector).size();
+            });
+        },
         not: function (selector) {
             var nodes = [];
             if (type.isFunction(selector)) {
@@ -419,8 +441,53 @@ var Jackey8 = (function (type) {
                 //array
                 return J8(nodes);
             }
+        },
+        find: function (selector) {
+            var result, J8this = this;
+            if (!selector) {
+                //如果selector为空，返回一个空的J8实例
+                result = J8();
+            } else if (typeof selector === 'object') {
+                // 如果是对象
+                //todo: object
+                return J8(selector).filter(function () {
+                    var node = this;
+                    return emptyArray.some.call(J8this, function (parent) {
+                        return J8.contains(parent, node);
+                    });
+                });
+            } else if (this.length === 1) {
+                //如果只有一个元素，利用queryDom(context,selector), 返回改元素的实例
+                result = J8(jackey8.queryDom(this[0], selector));
+            } else {
+                //多个数组，则遍历
+                result = this.map(function () {
+                    return jackey8.queryDom(this, selector);
+                });
+            }
+
+            return result;
+        },
+        parent: function (selector) {
+            //取得父亲节点
+            var parentNodes = getProperty(this, 'parentNode');
+            //去重
+            parentNodes = unique(parentNodes);
+            return J8(parentNodes).filter(selector);
         }
     };
+
+    function getProperty(elements, property) {
+        return J8.map(elements, function (element) {
+            return element[property];
+        });
+    }
+
+    function unique(arr) {
+        return emptyArray.filter.call(arr, function (item, index) {
+            return arr.indexOf(item) === index;
+        });
+    }
 
     return J8;
 
