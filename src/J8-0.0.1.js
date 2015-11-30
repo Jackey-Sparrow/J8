@@ -286,6 +286,7 @@ var Jackey8 = (function (type) {
     };
 
     //parent 是否是node的父亲节点
+    //document.documentElement.contains(node)
     J8.contains = document.documentElement.contains ?
         function (parent, node) {
             return parent !== node && parent.contains(node);
@@ -433,6 +434,29 @@ var Jackey8 = (function (type) {
                 //array
                 return J8(nodes);
             }
+        },
+        find: function (selector) {
+            var result, J8this = this;
+            if (!selector) {
+                //如果selector为空，返回一个空的J8实例
+                result = J8();
+            } else if (typeof selector === 'object') {
+                // 如果是对象
+                return J8(selector).filter(function () {
+                    var node = this;
+                    return emptyArray.some.call(J8this, function (parent) {
+                        return J8.contains(parent, node);
+                    });
+                });
+            } else if (this.length === 1) {
+                result = J8(jackey8.queryDom(this[0], selector));
+            } else {
+                result = this.map(function () {
+                    return jackey8.queryDom(this, selector);
+                });
+            }
+
+            return result;
         }
     };
 
