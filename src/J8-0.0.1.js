@@ -494,6 +494,22 @@ var Jackey8 = (function (type) {
             }
 
             return J8(result).filter(selector);
+        },
+        children: function (selector) {
+            //getChildren 选取子节点，
+            var children = J8.map(this, function (element) {
+                return getChildren(element);
+            });
+
+            //返回children的实例并filter selector
+            return J8(children).filter(selector);
+        },
+        contents: function () {
+            //遍历element组合
+            return J8.map(this, function (element) {
+                //转换为数组返回childNodes
+                return slice.call(element.childNodes);
+            });
         }
     };
 
