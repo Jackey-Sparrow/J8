@@ -556,7 +556,36 @@ var Jackey8 = (function (type) {
         var inside = index % 2;//0 after before ; 1 prepend append
 
         J8.fn[operator] = function () {
+            //arguments 可能为节点（object） 节点数组(array),J8的对象 或者html字符串
+            var nodes = $.map(arguments, function (arg) {
+                    if (type.isObject(arg) || type.isArray(arg) || arg === null) {
+                        return arg;
+                    } else {
+                        //html string
+                        return jackey8.createNodeByHtmlFragment(arg);
+                    }
+                }),
+                parent,
+                copyByClone = this.length > 1;
 
+            if (nodes.length < 1) {
+                return this;
+            }
+
+            return this.each(function (index, element) {
+                //0 after before(get parentNode) ; 1 prepend append(self)
+                parent = inside ? element : element.parentNode;
+
+                //0 after:element.nextSibling
+                //1 prepend:element.firstChild
+                //2 before: self
+                //3 append: null
+                element = index === 0 ? element.nextSibling :
+                    index === 1 ? element.firstChild :
+                        index === 2 ? element : null;
+
+                var parentInDocument = J8.contains(document.documentElement, parent);
+            });
         };
     });
 
