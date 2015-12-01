@@ -540,6 +540,14 @@ var Jackey8 = (function (type) {
             return this.each(function () {
                 this.innerHTML = '';
             });
+        },
+        show: function () {
+            return this.each(function () {
+                this.style.display === 'none' && (this.style.display = '');
+                if(getComputedStyle(this,'').getPropertyValue('display')==='node'){
+                    //this.style.display =
+                }
+            });
         }
     };
 
