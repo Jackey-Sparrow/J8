@@ -512,12 +512,42 @@ var Jackey8 = (function (type) {
             });
         },
         siblings: function (selector) {
+            //parentNode下得所有不等于自己得子节点
             var result = J8.map(this, function (element) {
                 return emptyArray.filter.call(getChildren(element.parentNode), function (child) {
                     return child !== element;
                 });
             });
             return J8(result).filter(selector);
+        },
+        closest: function (selector, context) {
+            //查找最近得selector元素
+            var node = this[0], collection = false;
+
+            //selector如果是对象，则直接
+            if (typeof selector === 'object') {
+                collection = J8(selector);
+            }
+
+            //如果找不到，则往parent节点找，直到匹配jackey8.matches(node, selector)
+            while (node && !(collection ? collection.indexOf(node) >= 0 : jackey8.matches(node, selector))) {
+                node = node !== context && !type.isDocument(node) && node.parentNode;
+            }
+
+            return J8(node);
+        },
+        empty: function () {
+            return this.each(function () {
+                this.innerHTML = '';
+            });
+        },
+        show: function () {
+            return this.each(function () {
+                this.style.display === 'none' && (this.style.display = '');
+                if (getComputedStyle(this, '').getPropertyValue('display') === 'node') {
+                    //this.style.display =
+                }
+            });
         }
     };
 

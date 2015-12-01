@@ -544,7 +544,7 @@ var Jackey8 = (function (type) {
         show: function () {
             return this.each(function () {
                 this.style.display === 'none' && (this.style.display = '');
-                if(getComputedStyle(this,'').getPropertyValue('display')==='node'){
+                if (getComputedStyle(this, '').getPropertyValue('display') === 'node') {
                     //this.style.display =
                 }
             });
