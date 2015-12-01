@@ -552,6 +552,14 @@ var Jackey8 = (function (type) {
         }
     };
 
+    ['after', 'prepend', 'before', 'append'].forEach(function (operator, index) {
+        var inside = index % 2;//0 after before ; 1 prepend append
+
+        J8.fn[operator] = function () {
+
+        };
+    });
+
     function defaultDisplay(nodeName) {
         var element, display;
         //如果没有记录
