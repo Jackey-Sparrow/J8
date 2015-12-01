@@ -67,6 +67,7 @@ var Jackey8 = (function (type) {
             'td': tableRow, 'th': tableRow,
             '*': document.createElement('div')
         },
+        elementDisplay = {},
     //special attributes that should be get/set via method calls
         methodAttributes = ['val', 'css', 'html', 'text', 'data', 'width', 'height', 'offset'],
         simpleSelectorRE = /^[\w-]*$/,//字母 数字 或者下划线，不包括空格
@@ -545,11 +546,29 @@ var Jackey8 = (function (type) {
             return this.each(function () {
                 this.style.display === 'none' && (this.style.display = '');
                 if (getComputedStyle(this, '').getPropertyValue('display') === 'node') {
-                    //this.style.display =
+                    this.style.display = defaultDisplay(this.nodeName);
                 }
             });
         }
     };
+
+    function defaultDisplay(nodeName) {
+        var element, display;
+        //如果没有记录
+        if (!elementDisplay[nodeName]) {
+            //根据nodeName去创建一个该元素
+            element = document.createElement(nodeName);
+            document.body.appendChild(element);
+            //获取display的值
+            display = getComputedStyle(element, '').getPropertyValue('display');
+            element.parentNode.removeChild(element);
+            //如果是none，则赋值为block
+            display === 'none' && (display = 'block');
+            //记录该元素的display值
+            elementDisplay[nodeName] = display;
+        }
+        return elementDisplay[nodeName];
+    }
 
     //选取元素的属性
     function getProperty(elements, property) {
