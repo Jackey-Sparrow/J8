@@ -535,6 +535,11 @@ var Jackey8 = (function (type) {
             }
 
             return J8(node);
+        },
+        empty: function () {
+            return this.each(function () {
+                this.innerHTML = '';
+            });
         }
     };
 
