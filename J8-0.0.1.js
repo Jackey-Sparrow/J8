@@ -67,6 +67,7 @@ var Jackey8 = (function (type) {
             'td': tableRow, 'th': tableRow,
             '*': document.createElement('div')
         },
+        elementDisplay = {},
     //special attributes that should be get/set via method calls
         methodAttributes = ['val', 'css', 'html', 'text', 'data', 'width', 'height', 'offset'],
         simpleSelectorRE = /^[\w-]*$/,//字母 数字 或者下划线，不包括空格
@@ -215,6 +216,7 @@ var Jackey8 = (function (type) {
         } else if (type.isArray(selector)) {
             dom = removeNullArray(selector);
         } else if (type.isObject(selector)) {
+            //返回数组
             dom = [selector];
             selector = null;
         } else {
@@ -222,6 +224,42 @@ var Jackey8 = (function (type) {
         }
 
         return jackey8.decorateDom(dom, selector);
+    };
+
+    //查找selector是否存在于element元素中
+    jackey8.matches = function (element, selector) {
+        if (!selector || !element || element.nodeType !== 1) {
+            return false;
+        }
+
+        //matchesSelector(element,selector)
+        //检测该选择器selector是否匹配该元素element的属性
+        var matcherSelector = element.webkitMatchesSelector ||
+            element.mosMatchesSelector ||
+            element.oMatchesSelector ||
+            element.matchesSelector;
+
+        if (matcherSelector) {
+            return matcherSelector.call(element, selector);
+        }
+
+        var match, parent = element.parentNode, temp = !parent;
+
+        //如果没有parentNode
+        if (temp) {
+            parent = document.createElement('div');
+            parent.appendChild(element);
+        }
+
+        //~-1 = 0
+        match = ~jackey8.queryDom(parent, selector).indexOf(element);
+
+        if (temp) {
+            parent.removeChild(element);
+        }
+
+        return !!match;
+
     };
 
     J8 = function (selector, context) {
@@ -238,7 +276,7 @@ var Jackey8 = (function (type) {
                 }
             }
         } else {
-            for (key in elements) {
+            for (key in elements) {//jshint ignore:line
                 value = callback(elements[key], key);
                 if (value) {
                     values.push(value);
@@ -248,6 +286,21 @@ var Jackey8 = (function (type) {
 
         return values;
     };
+
+    //parent 是否是node的父亲节点
+    //document.documentElement.contains(node)
+    J8.contains = document.documentElement.contains ?
+        function (parent, node) {
+            return parent !== node && parent.contains(node);
+        } :
+        function (parent, node) {
+            while (node && (node = node.parentNode)) {
+                if (node === parent) {
+                    return true;
+                }
+                return false;
+            }
+        };
 
     /**
      * each
@@ -272,7 +325,7 @@ var Jackey8 = (function (type) {
             }
         }
         return elements;
-    }
+    };
 
     J8.fn = {
         forEach: emptyArray.forEach,
@@ -317,13 +370,239 @@ var Jackey8 = (function (type) {
                 }
             });
         },
+        filter: function (selector) {
+            if (type.isFunction(selector)) {
+                return this.not(this.not(selector));
+            }
+            //选取返回的html collection中匹配selector的元素
+            return J8(emptyArray.filter.call(this, function (element) {
+                return jackey8.matches(element, selector);
+            }));
+        },
         each: function (callback) {
             emptyArray.every.call(this, function (element, index) {
                 return callback.call(element, index, element) !== false;
             });
             return this;
+        },
+        slice: function () {
+            //J8() 转为J8实例
+            return J8(slice.apply(this, arguments));
+        },
+        eq: function (index) {
+            return index === -1 ? this.slice(index) : this.slice(index, +index + 1);
+        },
+        first: function () {
+            var element = this[0];
+            return element && type.isObject(element) ? element : J8(element);
+        },
+        last: function () {
+            var element = this[this.length - 1];
+            return element && type.isObject(element) ? element : J8(element);
+        },
+        is: function (selector) {
+            if (this.length > 0 && jackey8.matches(this[0], selector)) {
+                return true;
+            }
+            return false;
+        },
+        has: function (selector) {
+            //s是否具有selector
+            return this.filter(function () {
+                return type.isObject(selector) ?
+                    J8.contains(this, selector) :
+                    J8(this).find(selector).size();
+            });
+        },
+        not: function (selector) {
+            //查找不是selector的集合 ｜｜ 去掉selector的元素
+            var nodes = [];
+            if (type.isFunction(selector)) {
+                this.each(function (index) {
+                    //如果函数执行后不是返回false，则push进去
+                    if (!selector.call(this, index)) {
+                        nodes.push(this);
+                    }
+                });
+            } else {
+                var excludes;
+                //如果是单纯的string，则检查当前返回的html collection里面是否匹配selector
+                if (typeof selector === 'string') {
+                    excludes = this.filter(selector);
+                } else {
+                    //如果是数组，而且item为函数，则直接赋值，其它则实例化
+                    if (type.isArray(selector) && type.isFunction(selector.item)) {
+                        excludes = slice.call(selector);
+                    } else {
+                        J8(selector);
+                    }
+                    this.forEach(function (element) {
+                        if (excludes.indexOf(element)) {
+                            nodes.push(element);
+                        }
+                    });
+                }
+                //array
+                return J8(nodes);
+            }
+        },
+        find: function (selector) {
+            //查找selector(子元素)，返回一个组合的结果
+            var result, J8this = this;
+            if (!selector) {
+                //如果selector为空，返回一个空的J8实例
+                result = J8();
+            } else if (typeof selector === 'object') {
+                // 如果是对象
+                //todo: object
+                return J8(selector).filter(function () {
+                    var node = this;
+                    return emptyArray.some.call(J8this, function (parent) {
+                        return J8.contains(parent, node);
+                    });
+                });
+            } else if (this.length === 1) {
+                //如果只有一个元素，利用queryDom(context,selector), 返回改元素的实例
+                result = J8(jackey8.queryDom(this[0], selector));
+            } else {
+                //多个数组，则遍历
+                result = this.map(function () {
+                    return jackey8.queryDom(this, selector);
+                });
+            }
+
+            return result;
+        },
+        parent: function (selector) {
+            //取得父亲节点
+            var parentNodes = getProperty(this, 'parentNode');
+            //去重
+            parentNodes = unique(parentNodes);
+            return J8(parentNodes).filter(selector);
+        },
+        parents: function (selector) {
+            var result = [], nodes = this;
+            //深度遍历
+            while (nodes.length > 0) {
+                nodes = J8.map(nodes, function (node) {
+                    //选取父亲节点，检查是否是document
+                    node = node.parentNode;
+                    if (type.isDocument(node) && result.indexOf(node) === -1) {
+                        result.push(node);
+                        return node;
+                    }
+                });//jshint ignore:line
+            }
+
+            return J8(result).filter(selector);
+        },
+        children: function (selector) {
+            //getChildren 选取子节点，
+            var children = J8.map(this, function (element) {
+                return getChildren(element);
+            });
+
+            //返回children的实例并filter selector
+            return J8(children).filter(selector);
+        },
+        contents: function () {
+            //遍历element组合
+            return J8.map(this, function (element) {
+                //转换为数组返回childNodes
+                return slice.call(element.childNodes);
+            });
+        },
+        siblings: function (selector) {
+            //parentNode下得所有不等于自己得子节点
+            var result = J8.map(this, function (element) {
+                return emptyArray.filter.call(getChildren(element.parentNode), function (child) {
+                    return child !== element;
+                });
+            });
+            return J8(result).filter(selector);
+        },
+        closest: function (selector, context) {
+            //查找最近得selector元素
+            var node = this[0], collection = false;
+
+            //selector如果是对象，则直接
+            if (typeof selector === 'object') {
+                collection = J8(selector);
+            }
+
+            //如果找不到，则往parent节点找，直到匹配jackey8.matches(node, selector)
+            while (node && !(collection ? collection.indexOf(node) >= 0 : jackey8.matches(node, selector))) {
+                node = node !== context && !type.isDocument(node) && node.parentNode;
+            }
+
+            return J8(node);
+        },
+        empty: function () {
+            return this.each(function () {
+                this.innerHTML = '';
+            });
+        },
+        show: function () {
+            return this.each(function () {
+                this.style.display === 'none' && (this.style.display = '');
+                if (getComputedStyle(this, '').getPropertyValue('display') === 'node') {
+                    this.style.display = defaultDisplay(this.nodeName);
+                }
+            });
         }
     };
+
+    ['after', 'prepend', 'before', 'append'].forEach(function (operator, index) {
+        var inside = index % 2;//0 after before ; 1 prepend append
+
+        J8.fn[operator] = function () {
+
+        };
+    });
+
+    function defaultDisplay(nodeName) {
+        var element, display;
+        //如果没有记录
+        if (!elementDisplay[nodeName]) {
+            //根据nodeName去创建一个该元素
+            element = document.createElement(nodeName);
+            document.body.appendChild(element);
+            //获取display的值
+            display = getComputedStyle(element, '').getPropertyValue('display');
+            element.parentNode.removeChild(element);
+            //如果是none，则赋值为block
+            display === 'none' && (display = 'block');
+            //记录该元素的display值
+            elementDisplay[nodeName] = display;
+        }
+        return elementDisplay[nodeName];
+    }
+
+    //选取元素的属性
+    function getProperty(elements, property) {
+        return J8.map(elements, function (element) {
+            return element[property];
+        });
+    }
+
+    //去重
+    function unique(arr) {
+        return emptyArray.filter.call(arr, function (item, index) {
+            return arr.indexOf(item) === index;
+        });
+    }
+
+    //选取元素的子节点
+    //如果具有children属性则使用，没有则使用childNodes
+    function getChildren(element) {
+        return 'children' in element ?
+            slice.call(element.children) :
+            J8.map(element.childNodes, function (node) {
+                if (node.nodeType === 1) {
+                    return node;
+                }
+            });
+    }
 
     return J8;
 
