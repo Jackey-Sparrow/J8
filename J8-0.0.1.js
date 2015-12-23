@@ -209,7 +209,7 @@ var Jackey8 = (function (type) {
 			else {
 				// 正常的选取
 				// 1 id 2 class 3 复杂选取
-				// 作用域为document，因为如果存在context，则执行$(conetxt).find(selector)
+				// 作用域为document，因为如果存在context，则执行J8(conetxt).find(selector)
 				dom = jackey8.queryDom(document, selector);
 			}
 		}
@@ -574,7 +574,7 @@ var Jackey8 = (function (type) {
 
 		J8.fn[operator] = function () {
 			//arguments 可能为节点（object） 节点数组(array),J8的对象 或者html字符串
-			var nodes = $.map(arguments, function (arg) {
+			var nodes = J8.map(arguments, function (arg) {
 					if (type.isObject(arg) || type.isArray(arg) || arg === null) {
 						return arg;
 					}
@@ -603,9 +603,48 @@ var Jackey8 = (function (type) {
 						index === 2 ? element : null;
 
 				var parentInDocument = J8.contains(document.documentElement, parent);
+
+				nodes.forEach(function (node) {
+					if (copyByClone) {
+						node = node.cloneNode(true);
+					}
+					else if (!parent) {
+						return J8(node).remove();
+					}
+					//全靠insertBefore
+					parent.insertBefore(node, element);
+
+					//遍历查看是否有script节点，如果有则执行里面的代码
+					if (parentInDocument) {
+						traverseNode(node, function (element) {
+							if (element.nodeName !== null &&
+								element.nodeName.toUpperCase() === 'SCRIPT' &&
+								(!element.type || element.type === 'text/javascript') && !element.src) {
+								window['eval'].call(window, element.innerHTML);
+							}
+						});
+					}
+
+				});
 			});
 		};
+
+		// after    => insertAfter
+		// prepend  => prependTo
+		// before   => insertBefore
+		// append   => appendTo
+		J8.fn[inside ? operator + 'To' : 'insert' + (index ? 'Before' : 'After')] = function (html) {
+			J8(html)[operator](this);
+			return this;
+		}
 	});
+
+	//node 和下面的节点全都执行fun(node)的方法
+	function traverseNode(node, fun) {
+		fun(node);
+		for (var i = 0, len = node.childNodes.length; i < len; i++)
+			traverseNode(node.childNodes[i], fun)
+	}
 
 	function defaultDisplay(nodeName) {
 		var element, display;

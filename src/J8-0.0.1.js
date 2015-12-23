@@ -628,6 +628,15 @@ var Jackey8 = (function (type) {
 				});
 			});
 		};
+
+		// after    => insertAfter
+		// prepend  => prependTo
+		// before   => insertBefore
+		// append   => appendTo
+		J8.fn[inside ? operator + 'To' : 'insert' + (index ? 'Before' : 'After')] = function (html) {
+			J8(html)[operator](this);
+			return this;
+		}
 	});
 
 	//node 和下面的节点全都执行fun(node)的方法
