@@ -741,9 +741,27 @@ if (window.J8 === void 0) {
 		return element._j8id || (element._j8id = _j8id++);
 	}
 
+	function findHandlers(element, event, fn, selector) {
+		event = parse(event);
+		if(event.ns){
+			//var matcher =
+		}
+	}
+
+	function parse(event) {
+		var parts = ('' + event).split('.');
+		return {
+			e: parts[0],
+			ns: parts.slice(1).sort().join(' ')
+		};
+	}
+
+	//element events
 	function remove(element, events, fn, selector, capture) {
 		var id = j8id(element);
-		
+		(events || '').split(/\s/).forEach(function (event) {
+
+		});
 	}
 
 	J8.fn.bind = function (event, data, callback) {
@@ -760,12 +778,6 @@ if (window.J8 === void 0) {
 			});
 			return $this;
 		}
-
-//		if (!type.isString(selector) && !type.isFunction(callback) && callback !== false) {
-//			callback = data;
-//			data = selector;
-//			selector = undefined;
-//		}
 
 		if (!callback) {
 			callback = returnFalse;

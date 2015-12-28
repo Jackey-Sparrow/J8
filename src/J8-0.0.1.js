@@ -41,6 +41,10 @@ var type = (function () {
 			Object.getPrototypeOf(obj) === Object.prototype;
 	}
 
+	function isString(str) {
+		return class2type[toString.call(str)] === 'string';
+	}
+
 	return {
 		isWindow: isWindow,
 		isFunction: isFunction,
@@ -48,7 +52,8 @@ var type = (function () {
 		isObject: isObject,
 		isPlainObject: isPlainObject,
 		isArray: isArray,
-		isNumber: isNumber
+		isNumber: isNumber,
+		isString: isString
 	};
 })();
 
@@ -699,3 +704,95 @@ window.Jackey8 = Jackey8;
 if (window.J8 === void 0) {
 	window.J8 = Jackey8;
 }
+
+;
+(function (J8, type) {
+
+	var _j8id = 1,
+		slice = Array.prototype.slice,
+		handler = {},
+		specialEvents = {},
+		focusInSupported = 'onfocusin' in window,
+		focus = {
+			focus: 'focusin',
+			blur: 'focusout'
+		},
+		hover = {
+			mouseenter: 'mouseover',
+			mouseleave: 'mouseout'
+		},
+		returnTrue = function () {
+			return true;
+		},
+		returnFalse = function () {
+			return false;
+		},
+		ignoreProperties = /^([A-Z]|returnValue$|layer[XY]$)/,//所有大写的单词 returnValue layerX layerY
+		eventMethods = { //阻止事件
+			preventDefault: 'isDefaultPrevented',
+			stopImmediatePropagation: 'isImmediatePropagationStopped',
+			stopPropagation: 'isPropagationStopped'
+		};
+
+	specialEvents.click = specialEvents.mousedown = specialEvents.mouseup = specialEvents.mousemove = 'MouseEvents';
+
+	//给元素加上id
+	function j8id(element) {
+		return element._j8id || (element._j8id = _j8id++);
+	}
+
+	function findHandlers(element, event, fn, selector) {
+		event = parse(event);
+		if(event.ns){
+			//var matcher =
+		}
+	}
+
+	function parse(event) {
+		var parts = ('' + event).split('.');
+		return {
+			e: parts[0],
+			ns: parts.slice(1).sort().join(' ')
+		};
+	}
+
+	//element events
+	function remove(element, events, fn, selector, capture) {
+		var id = j8id(element);
+		(events || '').split(/\s/).forEach(function (event) {
+
+		});
+	}
+
+	J8.fn.bind = function (event, data, callback) {
+		return this.on(event, undefined, data, callback);
+	};
+
+
+	J8.fn.on = function (event, selector, data, callback, one) {
+		var autoRemove, delegator, $this = this;
+		//如果event是数组
+		if (event && !type.isString(event)) {
+			J8.each(event, function (type, fn) {
+				$this.on(type, selector, data, fn, one);
+			});
+			return $this;
+		}
+
+		if (!callback) {
+			callback = returnFalse;
+		}
+
+		return $this.each(function (_, element) {
+			if (one) {
+				autoRemove = function (e) {
+					remove(element, e.type, callback);
+					return callback.apply(this, arguments);
+				}
+			}
+		});
+	}
+
+
+})(J8, type);
+
