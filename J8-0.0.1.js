@@ -719,6 +719,10 @@ if (window.J8 === void 0) {
 
 	specialEvents.click = specialEvents.mousedown = specialEvents.mouseup = specialEvents.mousemove = 'MouseEvents';
 
+	//给元素加上id
+	function j8id(element) {
+		return element._j8id || (element._j8id = _j8id++);
+	}
 
 })(J8, type);
 
