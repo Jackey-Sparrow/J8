@@ -699,3 +699,26 @@ window.Jackey8 = Jackey8;
 if (window.J8 === void 0) {
 	window.J8 = Jackey8;
 }
+
+;
+(function (J8, type) {
+
+	var _j8id = 1,
+		slice = Array.prototype.slice,
+		handler = {},
+		specialEvents = {},
+		focusInSupported = 'onfocusin' in window,
+		focus = {
+			focus: 'focusin',
+			blur: 'focusout'
+		},
+		hover = {
+			mouseenter: 'mouseover',
+			mouseleave: 'mouseout'
+		};
+
+	specialEvents.click = specialEvents.mousedown = specialEvents.mouseup = specialEvents.mousemove = 'MouseEvents';
+
+
+})(J8, type);
+
