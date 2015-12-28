@@ -715,6 +715,18 @@ if (window.J8 === void 0) {
 		hover = {
 			mouseenter: 'mouseover',
 			mouseleave: 'mouseout'
+		},
+		returnTrue = function () {
+			return true;
+		},
+		returnFalse = function () {
+			return false;
+		},
+		ignoreProperties = /^([A-Z]|returnValue$|layer[XY]$)/,//所有大写的单词 returnValue layerX layerY
+		eventMethods = { //阻止事件
+			preventDefault: 'isDefaultPrevented',
+			stopImmediatePropagation: 'isImmediatePropagationStopped',
+			stopPropagation: 'isPropagationStopped'
 		};
 
 	specialEvents.click = specialEvents.mousedown = specialEvents.mouseup = specialEvents.mousemove = 'MouseEvents';
