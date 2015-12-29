@@ -756,6 +756,10 @@ if (window.J8 === void 0) {
 		};
 	}
 
+	function matcherFor(ns) {
+		return new RegExp('(?:^| )' + ns.replace(' ', ' .* ?') + '(?: |$)');
+	}
+
 	//element events
 	function remove(element, events, fn, selector, capture) {
 		var id = j8id(element);
