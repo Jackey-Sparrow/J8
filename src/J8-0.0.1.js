@@ -743,7 +743,7 @@ if (window.J8 === void 0) {
 
 	function findHandlers(element, event, fn, selector) {
 		event = parse(event);
-		if(event.ns){
+		if (event.ns) {
 			//var matcher =
 		}
 	}
@@ -762,6 +762,17 @@ if (window.J8 === void 0) {
 		(events || '').split(/\s/).forEach(function (event) {
 
 		});
+	}
+
+	function createProxy(event) {
+		var key, proxy = {originalEvent: event};
+		for (key in event) {
+			if (!ignoreProperties.test(key) && event[key] !== void 0) {
+				proxy[key] = event[key];
+			}
+		}
+
+		return compatible(proxy, event);
 	}
 
 	J8.fn.bind = function (event, data, callback) {
@@ -790,6 +801,21 @@ if (window.J8 === void 0) {
 					return callback.apply(this, arguments);
 				}
 			}
+
+			if (selector) {
+				delegator = function (e) {
+					var evt,
+						match = J8(e.target).closest(selector, element).get(0);
+					if (match && match !== element) {
+						evt = J8.extend(createProxy(e), {
+							currentTarget: match, liveFired: element
+						});
+						return (autoRemove || callback).apply(match, [evt].concat(slice.call(arguments, 1)));
+					}
+				}
+			}
+
+			add(element, event, callback, data, selector, delegator || autoRemove);
 		});
 	}
 
