@@ -743,7 +743,7 @@ if (window.J8 === void 0) {
 
 	function findHandlers(element, event, fn, selector) {
 		event = parse(event);
-		if(event.ns){
+		if (event.ns) {
 			//var matcher =
 		}
 	}
@@ -756,10 +756,6 @@ if (window.J8 === void 0) {
 		};
 	}
 
-	function matcherFor(ns) {
-		return new RegExp('(?:^| )' + ns.replace(' ', ' .* ?') + '(?: |$)');
-	}
-
 	//element events
 	function remove(element, events, fn, selector, capture) {
 		var id = j8id(element);
@@ -768,10 +764,47 @@ if (window.J8 === void 0) {
 		});
 	}
 
+	function createProxy(event) {
+		var key, proxy = {originalEvent: event};
+		for (key in event) {
+			if (!ignoreProperties.test(key) && event[key] !== void 0) {
+				proxy[key] = event[key];
+			}
+		}
+
+		return compatible(proxy, event);
+	}
+
+	function compatible(event, source) {
+		//如果source存在，而且不存在event.isDefaultPrevented
+		if (source || !event.isDefaultPrevented) {
+			source || (source = event)//source = event
+
+			J8.each(eventMethods, function (name, predicate) {
+				var sourceMethod = source[name];
+				event[name] = function () {
+					this[predicate] = returnTrue;
+					return sourceMethod && sourceMethod.apply(source, arguments);
+				}
+				event[predicate] = returnFalse;
+			});
+
+			if (source.defaultPrevented !== void 0 ? source.defaultPrevented :
+					'returnValue' in source ? source.returnValue === false :
+					source.getPreventDefault && source.getPreventDefault()
+			) {
+				event.isDefaultPrevented = returnFalse;
+			}
+		}
+		return event;
+	}
+
+	function add(element, events, fn, data, selector, delegator, capture) {
+	}
+
 	J8.fn.bind = function (event, data, callback) {
 		return this.on(event, undefined, data, callback);
 	};
-
 
 	J8.fn.on = function (event, selector, data, callback, one) {
 		var autoRemove, delegator, $this = this;
@@ -794,6 +827,21 @@ if (window.J8 === void 0) {
 					return callback.apply(this, arguments);
 				}
 			}
+
+			if (selector) {
+				delegator = function (e) {
+					var evt,
+						match = J8(e.target).closest(selector, element).get(0);
+					if (match && match !== element) {
+						evt = J8.extend(createProxy(e), {
+							currentTarget: match, liveFired: element
+						});
+						return (autoRemove || callback).apply(match, [evt].concat(slice.call(arguments, 1)));
+					}
+				}
+			}
+
+			add(element, event, callback, data, selector, delegator || autoRemove);
 		});
 	}
 
