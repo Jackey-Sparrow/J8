@@ -799,10 +799,12 @@ if (window.J8 === void 0) {
 		return event;
 	}
 
+	function add(element, events, fn, data, selector, delegator, capture) {
+	}
+
 	J8.fn.bind = function (event, data, callback) {
 		return this.on(event, undefined, data, callback);
 	};
-
 
 	J8.fn.on = function (event, selector, data, callback, one) {
 		var autoRemove, delegator, $this = this;
