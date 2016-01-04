@@ -775,6 +775,30 @@ if (window.J8 === void 0) {
 		return compatible(proxy, event);
 	}
 
+	function compatible(event, source) {
+		//如果source存在，而且不存在event.isDefaultPrevented
+		if (source || !event.isDefaultPrevented) {
+			source || (source = event)//source = event
+
+			J8.each(eventMethods, function (name, predicate) {
+				var sourceMethod = source[name];
+				event[name] = function () {
+					this[predicate] = returnTrue;
+					return sourceMethod && sourceMethod.apply(source, arguments);
+				}
+				event[predicate] = returnFalse;
+			});
+
+			if (source.defaultPrevented !== void 0 ? source.defaultPrevented :
+					'returnValue' in source ? source.returnValue === false :
+					source.getPreventDefault && source.getPreventDefault()
+			) {
+				event.isDefaultPrevented = returnFalse;
+			}
+		}
+		return event;
+	}
+
 	J8.fn.bind = function (event, data, callback) {
 		return this.on(event, undefined, data, callback);
 	};
