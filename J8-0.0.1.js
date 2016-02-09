@@ -552,7 +552,7 @@ var Jackey8 = (function (type) {
         }
     };
 
-    //insertBefore
+    //insertBefore dependent on it
     ['after', 'prepend', 'before', 'append'].forEach(function (operator, index) {
         var inside = index % 2;//0 after before ; 1 prepend append
 
