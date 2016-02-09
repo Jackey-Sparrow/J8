@@ -572,7 +572,7 @@ var Jackey8 = (function (type) {
             display = getComputedStyle(element, '').getPropertyValue('display');
             element.parentNode.removeChild(element);
             //如果是none，则赋值为block
-            display === 'none' && (display = 'block');
+            display === 'none' && (display = 'block');//jshint ignore:line
             //记录该元素的display值
             elementDisplay[nodeName] = display;
         }
